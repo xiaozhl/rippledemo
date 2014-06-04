@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.1//EN" "http://struts.apache.org/dtds/struts-2.1.dtd">
+<struts>
+    <constant name="struts.i18n.encoding" value="utf-8"></constant>
+    <constant name="struts.action.extension" value="action"></constant>
+    <constant name="struts.devMode" value="true"></constant>
+    <!--由于集成了Spring，创建Action对象不再由Struts2来做,交给Spring来做 -->
+    <constant name="struts.objectFactory" value="spring"></constant>
+    
+ 	<package name="default" namespace="/"  extends="json-default">
+ 	 <interceptors>
+ 	  <interceptor name="auth" class="authproxy"></interceptor>
+ 	  <interceptor-stack name="mystack">
+ 	   <interceptor-ref name="defaultStack"></interceptor-ref>
+ 	   <interceptor-ref name="auth"></interceptor-ref>
+ 	  </interceptor-stack>
+ 	 </interceptors>
+ 	 <global-results>
+ 	  <result name="LOGIN" type="redirect">/login.jsp</result>
+ 	 </global-results>
+ 		<action name="book_*" class="bookaction" method="{1}">
+ 		 <result name="JSON" type="json">
+ 		  <param name="root">booksresult</param>
+ 		 </result>
+ 		 <result name="JSONSUCCESS" type="json">
+ 		  <param name="root">result</param>
+ 		 </result>
+ 		 <result name="DISPLAYBOOK">/displaybook.jsp</result>
+ 		</action>
+ 		<action name="user_*" class="useraction" method="{1}">
+ 		 <result name="SUCCESS" type="redirect">/index.jsp</result>
+ 		 <result name="LOGIN" type="redirect">/login.jsp</result>
+ 		</action>
+ 		<action name="cart_*" class="cartaction" method="{1}">
+ 		<interceptor-ref name="mystack"></interceptor-ref>
+ 		 <result name="SHOWCART">/showcart.jsp</result>
+ 		</action>
+ 		<action name="order_*" class="orderaction" method="{1}">
+ 		<interceptor-ref name="mystack"></interceptor-ref>
+ 		<result name="SUCCESS">/order_oper_status.jsp</result>
+ 		<result name="SHOWORDERS">/queryorders.jsp</result>
+ 		<result name="PAYRESULT" type="json">
+ 		 <param name="root">result</param>
+ 		</result>
+ 		</action>
+ 		
+ 		<action name="booktype_*" class="booktypeaction" method="{1}">
+ 		 <result name="JSON" type="json">
+ 		  <param name="root">booktypes</param>
+ 		 </result>
+ 		</action>
+ 		
+ 		<action name="search" class="searchaction">
+ 		 <result name="BOOKS">/searchresult.jsp</result>
+ 		</action>
+ 		
+ 		<action name="pay" class="payaction">
+ 		  <result name="PAYRESULT">/payresult.jsp</result>
+ 		</action>
+    </package>
+    <package name="seller" namespace="/Seller" extends="json-default">
+     <action name="seller_*" class="selleraction" method="{1}">
+      <result name="SUCCESS">main.jsp</result>
+     </action>
+    
+    </package>
+</struts>    

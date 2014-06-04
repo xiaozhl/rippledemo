@@ -1,0 +1,10 @@
+#Mon May 26 09:22:51 CST 2014
+eclipse.preferences.version=1
+encoding//src/com/study/action=gbk
+encoding//src/com/study/action/BookAction.java=gbk
+encoding//src/com/study/action/PayAction.java=gbk
+encoding//src/com/study/action/UserAction.java=gbk
+encoding//src/com/study/datasource/DatasourceAdvice.java=gbk
+encoding//src/com/study/datasource/DatasourceSwitch.java=gbk
+encoding//src/com/study/datasource/MyDatasource.java=gbk
+encoding//src/com/study/test/TestSearch.java=gbk

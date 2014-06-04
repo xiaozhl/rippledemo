@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.study.pojo.Seller" table="tb_seller">
+		<id name="selleruser">
+		 <generator class="assigned"></generator>
+		</id>
+		<property name="sellerpass"></property>
+		<property name="wallet"></property>
+		<bag name="books" inverse="true">
+		 <key column="sellerid"></key>
+		 <one-to-many class="com.study.pojo.Book"/>
+		</bag>
+		<bag name="orders" inverse="true">
+		 <key column="sellerid"></key>
+		 <one-to-many class="com.study.pojo.Order"/>
+		</bag>
+	</class>
+    
+
+</hibernate-mapping>

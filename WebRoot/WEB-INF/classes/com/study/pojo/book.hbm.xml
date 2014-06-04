@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.study.pojo.Book" table="tb_book">
+		<id name="bookid">
+		 <generator class="native"></generator>
+		</id>
+		<property name="title"></property>
+		<property name="author"></property>
+		<property name="pic"></property>
+		<property name="count"></property>
+		<property name="price"></property>
+		<many-to-one name="seller" column="sellerid"></many-to-one>
+	    <many-to-one name="type" lazy="false"></many-to-one>
+	</class>
+    
+
+</hibernate-mapping>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.study.pojo.Order" table="tb_order">
+		<id name="orderid">
+		 <generator class="native"></generator>
+		</id>
+		<property name="price"></property>
+		<property name="status"></property>
+		<property name="count"></property>
+		<property name="createTime"></property>
+		
+		<many-to-one name="book" column="bookid"></many-to-one>
+		<many-to-one name="user" column="userid"></many-to-one>
+		<many-to-one name="seller" column="sellerid"></many-to-one>
+	</class>
+    
+
+</hibernate-mapping>

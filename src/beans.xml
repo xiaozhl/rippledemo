@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd">
+<!--Aop生成代理对象的方式是CGLIB  -->
+<aop:aspectj-autoproxy proxy-target-class="true"></aop:aspectj-autoproxy>
+ <!-- 配置数据源 -->
+<bean id="master" class="org.apache.commons.dbcp.BasicDataSource">
+ 	<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+	<property name="url" value="jdbc:mysql://localhost:3306/bookstore"/>
+	<property name="username" value="root"/>
+	<property name="password" value="123456"/>
+	     <!-- 连接池启动时的初始值 -->
+	<property name="initialSize" value="1"/>
+		 <!-- 连接池的最大值 -->
+	 <property name="maxActive" value="500"/>
+		 <!-- 最大空闲值.当经过一个高峰时间后，连接池可以慢慢将已经用不到的连接慢慢释放一部分，一直减少到maxIdle为止 -->
+	 <property name="maxIdle" value="2"/>
+		 <!--  最小空闲值.当空闲的连接数少于阀值时，连接池就会预申请去一些连接，以免洪峰来时来不及申请 -->
+	<property name="minIdle" value="1"/>
+</bean>
+ <!-- 配置数据源 -->
+<bean id="slave" class="org.apache.commons.dbcp.BasicDataSource">
+ 	<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+	<property name="url" value="jdbc:mysql://localhost:3306/bookstore"/>
+	<property name="username" value="root"/>
+	<property name="password" value="123456"/>
+	     <!-- 连接池启动时的初始值 -->
+	<property name="initialSize" value="1"/>
+		 <!-- 连接池的最大值 -->
+	 <property name="maxActive" value="500"/>
+		 <!-- 最大空闲值.当经过一个高峰时间后，连接池可以慢慢将已经用不到的连接慢慢释放一部分，一直减少到maxIdle为止 -->
+	 <property name="maxIdle" value="2"/>
+		 <!--  最小空闲值.当空闲的连接数少于阀值时，连接池就会预申请去一些连接，以免洪峰来时来不及申请 -->
+	<property name="minIdle" value="1"/>
+</bean>
+
+<!-- 动态数据源 -->
+<bean id="myds" class="com.study.datasource.MyDatasource">
+ <property name="targetDataSources">
+	<map key-type="java.lang.String">
+		<entry key="master" value-ref="master"></entry>
+		<entry key="slave"  value-ref="slave"></entry>
+	</map>
+	</property>
+	<property name="defaultTargetDataSource" ref="master"></property>
+</bean>
+<bean id="dsAdvice" class="com.study.datasource.DatasourceAdvice"></bean>
+<aop:config>
+	<aop:advisor pointcut="execution(* com.study.business..*.*(..))" advice-ref="dsAdvice"/>
+</aop:config>
+
+<!-- hibernate SessionFactory配置 -->
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+	<property name="dataSource" ref="myds"></property>
+		 <property name="mappingResources">
+		    <list>
+		      <value>com/study/pojo/user.hbm.xml</value>
+		      <value>com/study/pojo/seller.hbm.xml</value>
+		      <value>com/study/pojo/booktype.hbm.xml</value>
+		      <value>com/study/pojo/book.hbm.xml</value>
+		      <value>com/study/pojo/order.hbm.xml</value>
+		    </list>
+		 </property>
+	     <property name="hibernateProperties">
+		    <value>
+		        hibernate.dialect=org.hibernate.dialect.MySQL5Dialect
+		        hibernate.hbm2ddl.auto=update
+		        hibernate.show_sql=true
+		        hibernate.format_sql=false
+		      </value>
+	     </property>
+</bean>
+
+<!-- Spring hibernate的事务配置 -->
+<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+ <property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+<!-- 配置事务的advice -->
+<tx:advice id="txadvice1" transaction-manager="txManager">
+ <tx:attributes>
+  <tx:method name="do*" propagation="REQUIRED"/>
+ </tx:attributes>
+</tx:advice>
+<!-- 具体怎么拦截 -->
+<aop:config>
+ <aop:pointcut id="pt1" expression="execution(* com.study.business.*.doit(..))"/>
+ <aop:advisor advice-ref="txadvice1" pointcut-ref="pt1"/>
+</aop:config>
+
+<bean id="bookdao" class="com.study.dao.BookDAOImpl">
+ <property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+<bean id="querybooks" class="com.study.business.QueryAllBooksBiz" scope="request">
+ <property name="bookdao" ref="bookdao"></property>
+</bean>
+<bean id="addbookbiz" class="com.study.business.AddBookBiz" scope="request">
+ <property name="bookdao" ref="bookdao"></property>
+</bean>
+<bean id="removebooksbiz" class="com.study.business.RemoveBooksBiz" scope="request">
+ <property name="bookdao" ref="bookdao"></property>
+</bean>
+<!-- action -->
+<bean id="bookaction" class="com.study.action.BookAction" scope="request">
+ <property name="querybooks" ref="querybooks"></property>
+ <property name="addBook" ref="addbookbiz"></property>
+ <property name="removeBooks" ref="removebooksbiz"></property>
+</bean>
+
+<bean id="userdao" class="com.study.dao.UserDAOImpl">
+ <property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+<bean id="loginbiz" class="com.study.business.LoginBiz" scope="request">
+ <property name="userdao" ref="userdao"></property>
+</bean>
+<bean id="regbiz" class="com.study.business.RegBiz" scope="request">
+ <property name="userdao" ref="userdao"></property>
+</bean>
+
+<bean id="useraction" class="com.study.action.UserAction" scope="request">
+ <property name="login" ref="loginbiz"></property>
+ <property name="reg" ref="regbiz"></property>
+</bean>
+
+<bean id="cartaction" class="com.study.action.CartAction" scope="session">
+ <property name="querybook" ref="querybooks"></property>
+</bean>
+
+<bean id="authproxy" class="com.study.interceptor.AuthInterceptor"></bean>
+
+
+<!-- order -->
+<bean id="orderdao" class="com.study.dao.OrderDAOImpl">
+ <property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+
+<bean id="addorderbiz" class="com.study.business.AddOrderBiz" scope="request">
+ <property name="orderdao" ref="orderdao"></property>
+ <property name="bookdao" ref="bookdao"></property>
+</bean>
+<bean id="updateorderbiz" class="com.study.business.UpdateOrderBiz" scope="request">
+ <property name="orderdao" ref="orderdao"></property>
+</bean>
+<bean id="queryorderbiz" class="com.study.business.QueryOrders" scope="request">
+ <property name="orderdao" ref="orderdao"></property>
+</bean>
+<bean id="orderaction" class="com.study.action.OrderAction" scope="request">
+ <property name="addorder" ref="addorderbiz"></property>
+ <property name="queryorder" ref="queryorderbiz"></property>
+ <property name="updateOrder" ref="updateorderbiz"></property>
+</bean>
+
+<bean id="booktypedao" class="com.study.dao.BookTypeDAOImpl">
+ <property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+<bean id="querybooktypebiz" class="com.study.business.QueryAllBookTypesBiz">
+ <property name="booktypedao" ref="booktypedao"></property>
+</bean>
+<bean id="booktypeaction" class="com.study.action.BookTypeAction">
+ <property name="querybooktype" ref="querybooktypebiz"></property>
+</bean>
+
+<!-- 搜索引擎 -->
+<bean id="searchbiz" class="com.study.business.SearchBiz" scope="request">
+ <property name="bookdao" ref="bookdao"></property>
+ <property name="host" value="localhost"></property>
+ <property name="port" value="9312"></property>
+</bean>
+<bean id="searchaction" class="com.study.action.SearchAction" scope="request">
+ <property name="search" ref="searchbiz"></property>
+</bean>
+
+<bean id="paybiz" class="com.study.business.PayBiz" scope="request">
+ <property name="orderdao" ref="orderdao"></property>
+</bean>
+<bean id="payaction" class="com.study.action.PayAction" scope="request">
+ <property name="payBiz" ref="paybiz"></property>
+</bean>
+
+<!-- 卖家相关 -->
+<bean id="sellerdao" class="com.study.dao.SellerDAOImpl">
+ <property name="sessionFactory" ref="sessionFactory"></property>
+</bean>
+<bean id="sellerloginbiz" class="com.study.business.SellerLoginBiz">
+ <property name="sellerDAO" ref="sellerdao"></property>
+</bean>
+<bean id="selleraction" class="com.study.action.SellerAction">
+ <property name="sellerlogin" ref="sellerloginbiz"></property>
+</bean>
+</beans> 
