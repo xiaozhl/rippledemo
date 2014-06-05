@@ -48,11 +48,14 @@
 </div>
 <div class="adv_left" id="adv1">
 <h1 onclick="closeAdv('adv1')">X</h1>
-南京艾瑞职业培训学校
+<a target="_blank" 
+	href="http://shang.qq.com/wpa/qunwpa?idkey=7c718f481efb81815f8ccb8f6be8e6bb3cbfeeaa637bd3d48866d4ebf8c9c3d6">
+	<img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="JAVA一起学" title="JAVA一起学">
+ </a>
 </div>
 <div class="adv_right" id="adv2">
 <h1 onclick="closeAdv('adv2')">X</h1>
-南京艾瑞职业培训学校
+我们一起Java QQ群：370930699
 </div>
 <div id="adv">
 <div class="adv_l_c">
