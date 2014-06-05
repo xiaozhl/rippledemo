@@ -21,6 +21,11 @@
  		<action name="book_*" class="bookaction" method="{1}">
  		 <result name="JSON" type="json">
  		  <param name="root">booksresult</param>
+ 		  <param name="excludeProperties">
+ 		   rows\[\d+\]\.seller\.sellerpass,
+ 		   rows\[\d+\]\.seller\.books,
+ 		   rows\[\d+\]\.seller\.orders
+ 		  </param>
  		 </result>
  		 <result name="JSONSUCCESS" type="json">
  		  <param name="root">result</param>
